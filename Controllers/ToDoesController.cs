@@ -23,12 +23,23 @@ namespace ToDoList.Controllers
         }
 
         // GET: ToDoes
-        public async Task<IActionResult> Index()
+        public IActionResult Index()
         {
+            return View();
+        }
 
+        private IEnumerable<ToDo> GetMyToDoes()
+        {
             string currentUserId = User.Identity.GetUserId();
             IdentityUser currentUser = _context.Users.FirstOrDefault(x => x.Id == currentUserId);
-            return View(await _context.ToDos.Where(x => x.User == currentUser).ToListAsync());
+            return _context.ToDos.Where(x => x.User == currentUser).ToList();
+
+        }
+
+        public IActionResult BuildToDoTable()
+        {
+
+            return PartialView("_ToDoTable", GetMyToDoes());
         }
 
         // GET: ToDoes/Details/5
@@ -73,6 +84,24 @@ namespace ToDoList.Controllers
                 return RedirectToAction(nameof(Index));
             }
             return View(toDo);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> AjaxCreate([Bind("Id,Description")] ToDo toDo)
+        {
+            if (ModelState.IsValid)
+            {
+
+                string currentUserId = User.Identity.GetUserId();
+                IdentityUser currentUser = _context.Users.FirstOrDefault(x => x.Id == currentUserId);
+                toDo.User = currentUser;
+                toDo.IsDone = false;
+                _context.Add(toDo);
+                await _context.SaveChangesAsync();
+                return RedirectToAction(nameof(Index));
+            }
+            return PartialView("_ToDoTable",GetMyToDoes());
         }
 
         // GET: ToDoes/Edit/5
