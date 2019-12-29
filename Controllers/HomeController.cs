@@ -23,7 +23,7 @@ namespace ToDoList.Controllers
             return View();
         }
 
-        public IActionResult Privacy()
+        public IActionResult MyProjects()
         {
             return View();
         }
