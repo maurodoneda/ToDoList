@@ -32,7 +32,14 @@ namespace ToDoList.Controllers
         {
             string currentUserId = User.Identity.GetUserId();
             IdentityUser currentUser = _context.Users.FirstOrDefault(x => x.Id == currentUserId);
-            return _context.ToDos.Where(x => x.User == currentUser).ToList();
+
+            IEnumerable<ToDo> myToDoes = _context.ToDos.Where(x => x.User == currentUser).ToList();
+
+            int completed = myToDoes.Where(x => x.IsDone == true).Count();
+
+            ViewBag.Percent = Math.Round(100f * ((float)completed / (float)myToDoes.Count()));
+          
+            return myToDoes;
 
         }
 
@@ -99,7 +106,7 @@ namespace ToDoList.Controllers
                 toDo.IsDone = false;
                 _context.Add(toDo);
                 await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+               
             }
             return PartialView("_ToDoTable",GetMyToDoes());
         }
@@ -120,6 +127,29 @@ namespace ToDoList.Controllers
             return View(toDo);
         }
 
+        [HttpPost]
+        public IActionResult AjaxEdit(int? id, bool value)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            var toDo = _context.ToDos.Find(id);
+            if (toDo == null)
+            {
+                return NotFound();
+            }
+            else
+            {
+                toDo.IsDone = value;
+                _context.Update(toDo);
+                _context.SaveChanges();
+                return PartialView("_ToDoTable", GetMyToDoes());
+            }
+
+            
+        }
         // POST: ToDoes/Edit/5
         // To protect from overposting attacks, please enable the specific properties you want to bind to, for 
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
@@ -156,6 +186,7 @@ namespace ToDoList.Controllers
         }
 
         // GET: ToDoes/Delete/5
+        
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -169,19 +200,18 @@ namespace ToDoList.Controllers
             {
                 return NotFound();
             }
-
+                     
             return View(toDo);
         }
 
         // POST: ToDoes/Delete/5
-        [HttpPost, ActionName("Delete")]
-        [ValidateAntiForgeryToken]
+      
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var toDo = await _context.ToDos.FindAsync(id);
             _context.ToDos.Remove(toDo);
             await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
+            return PartialView("_ToDoTable", GetMyToDoes());
         }
 
         private bool ToDoExists(int id)

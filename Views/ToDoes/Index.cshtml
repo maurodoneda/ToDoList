@@ -6,20 +6,18 @@
 }
 
 
-
+<h2>What do I have to do now?</h2>
 <div id="tableDiv"></div>
-<div id="toDoCreateForm">
-    <form asp-action="AjaxCreate" asp-controller="ToDoes" method="POST" data-ajax="true" data-ajax-mode="" data-ajax-update="tableDiv">
-        <div class="form-group">
-            <label asp-for="Description" class="control-label"></label>
-            <input asp-for="Description" class="form-control" />
-            <span asp-validation-for="Description" class="text-danger"></span>
-        </div>
+<div>
+    <form asp-controller="ToDoes" asp-action="AjaxCreate" method="POST" data-ajax="true" data-ajax-mode="replace" data-ajax-update="#tableDiv" data-ajax-success="this.reset();">
+        <input asp-for="Description" class="form-control" placeholder="type new to do here..."/>
     </form>
 
 </div>
 
 @section Scripts{
     <script src="~/lib/jquery-ajax-unobtrusive/dist/jquery.unobtrusive-ajax.js"></script>
+    <script src="~/js/DeleteItems.js"></script>
     <script src="~/js/BuildTable.js"></script>
+
 }
